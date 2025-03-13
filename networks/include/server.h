@@ -14,10 +14,10 @@ class Server {
     Server(const Server&) = delete;  //disable copy constructor and shallow copying 
     Server& operator=(const Server&) = delete;
     
-    Server(const Server&) noexcept; //move semantics
+    Server(const Server&) noexcept; //move semantics enabled
     Server& operator=(Server&& other) noexcept;
 
-    int startServer();
+    int startServer(bool ipv6 = true);
     void closeServer();
     int acceptClient();
 

@@ -1,5 +1,5 @@
-#ifndef SERVER
-#define SERVER
+#ifndef SERVER_H
+#define SERVER_H
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -8,23 +8,21 @@
 
 class Server {
     public:
-    Server(std::string addr, int port); 
+    Server();
+    Server(std::string addr, int port);
     ~Server();
 
-    Server(const Server&) = delete;  //disable copy constructor and shallow copying 
-    Server& operator=(const Server&) = delete;
-    
-    Server(const Server&) noexcept; //move semantics enabled
-    Server& operator=(Server&& other) noexcept;
-
-    int startServer(bool ipv6 = true);
-    void closeServer();
+    int startServer(bool ipv6);
+    int serverListen();
     int acceptClient();
+    int sendHello();
 
     private:
     int serverSocket;
-    struct sockaddr_in serverAddress;
-
+    int newSocket;
+    struct sockaddr_in serverAddress_v4;
+    struct sockaddr_in6 serverAddress_v6;
+    std::string addr;
     int port;
 
 };

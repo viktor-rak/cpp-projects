@@ -5,18 +5,13 @@
 #include <string>
 #include <unistd.h>
 
-Server::Server() {
-    this->addr = "127.0.0.1";
-    this->port = 8080;
-}
+Server::Server() : addr("127.0.0.1"), port(8080) {} 
 
-Server::Server(std::string addr, int port) {
-    this->addr = addr;
-    this->port = port;
-}   
+Server::Server(std::string addr, int port) 
+: addr(addr), port(port) {}   
 
 Server::~Server() {
-    close(Server::serverSocket);
+    close(serverSocket);
 }
 
 
@@ -27,7 +22,7 @@ class SocketFailureException : public std::runtime_error {
 
 int Server::startServer(bool ipv6) {
     try {
-        Server::serverSocket = socket(ipv6 ? AF_INET6 : AF_INET, SOCK_STREAM, 0);
+        serverSocket = socket(ipv6 ? AF_INET6 : AF_INET, SOCK_STREAM, 0);
         if (Server::serverSocket == -1)
             throw new SocketFailureException("Socket creation failed. Error code" + (errno));
 
@@ -68,17 +63,24 @@ int Server::acceptClient() {
     }
 
     return this->newSocket;
-
 }
 
-int main(int argc, char** argv) {
-    if (argc < 2) {
-        std::cout << "No commandline arguments provided. Starting IPV6 server" << std::endl;
-    }
+void Server::sendHTTPResp() {
+    HTTPResponse response;
+    response.toString();
+    send(this->newSocket, response.toString().c_str(), response.toString().size(), 0);
+}
+
+
+int main() {
     try {
         Server server;
         server.startServer(false);
-    } catch (std::exception e) {
+        server.serverListen();
+        server.acceptClient();
+        server.sendHTTPResp();
 
+    } catch (std::exception e) {
+        std::cout << "Oopsie Daisy! HJAHHAHAHAHAHA" << std::endl;
     }
 }

@@ -35,7 +35,7 @@ class HTTPResponse {
 
     HTTPResponse() : statusLine("HTTP/1.1 200 OK"), headers(""), body("") {}
 
-    std::string buildResponse(int statusCode, std::string& statusMessage, std::string& contentType, std::string& responseBody) {
+    std::string buildResponse(int statusCode, std::string statusMessage, std::string contentType, std::string responseBody) {
         std::string response;
         response = "HTTP/1.1 " + std::to_string(statusCode) + " " + statusMessage  + "\r\n";
         response += "Content-Type: " + contentType + "\r\n";

@@ -4,6 +4,8 @@
 #include <arpa/inet.h>
 #include <string>
 #include <unistd.h>
+#include <fstream>
+#include <sstream>
 
 Server::Server() : addr("127.0.0.1"), port(8080) {} 
 
@@ -68,23 +70,48 @@ int Server::acceptClient() {
 void Server::sendHTTPResp() {
     int statusCode = 200;
     std::string statusMessage = "OK";
-    std::string contentType = "text/plain";
-    std::string responseBody = "Hello, world!";
+    std::string contentType = "text/html";
+    std::string responseBody;
+
+    try {
+        responseBody = readHTML("./index.html");
+    } catch (std::runtime_error e) {
+        responseBody = "<html><body><h1>500 Internal Server Error</h1></body></html>";
+        statusCode = 500;
+        statusMessage = "Internal Server Error";
+        std::cout << e.what() << std::endl;
+    }
     HTTPResponse response;
     std::string a = response.buildResponse(statusCode, statusMessage, contentType, responseBody);
     send(this->newSocket, a.c_str(), a.size(), 0);
 }
 
+std::string Server::readHTML(const std::string filename) {
+    std::stringstream buf;
+    std::string str;
+    std::ifstream file(filename);
+    if (!file) {
+        throw std::runtime_error("Failed to find HTML file. Err: " + std::to_string(errno));
+    }
+    buf << file.rdbuf();
+    str = buf.str();
+    file.close();
+    return str;
+}
 
 int main() {
     try {
         Server server;
-        server.startServer(false);
+        int ss = server.startServer(false);
         server.serverListen();
-        server.acceptClient();
-        server.sendHTTPResp();
-
+        while (true) { //print debugging
+            std::cout << "Waiting for client..." << std::endl;
+            server.acceptClient();
+            std::cout << "Client connected." << std::endl;
+            server.sendHTTPResp();
+            std::cout << "Response sent to client." << std::endl;
+        }
     } catch (std::exception e) {
-        std::cout << "Oopsie Daisy! HJAHHAHAHAHAHA" << std::endl;
+        std::cout << "you just hit my bad error handling" << e.what() << std::endl;
     }
 }

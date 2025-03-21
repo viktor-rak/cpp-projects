@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <string>
+#include <sstream>
 
 class Server {
 public:
@@ -15,8 +16,10 @@ public:
     int startServer(bool ipv6);
     int serverListen();
     int acceptClient();
-    int sendHello();
+    std::vector<char> receiveData();
+    void parseHTTP(std::vector<char> a);
     void sendHTTPResp();
+    std::string readHTML(const std::string filename);
 
 private:
     int serverSocket;
@@ -29,24 +32,18 @@ private:
 
 class HTTPResponse {
     public:
-    std::string statusLine;    
-    std::string headers;
-    std::string body;
-
-    HTTPResponse() : statusLine("HTTP/1.1 200 OK"), headers(""), body("") {}
+    HTTPResponse();
 
     std::string buildResponse(int statusCode, std::string statusMessage, std::string contentType, std::string responseBody) {
-        std::string response;
-        response = "HTTP/1.1 " + std::to_string(statusCode) + " " + statusMessage  + "\r\n";
-        response += "Content-Type: " + contentType + "\r\n";
-        response += "Content-Length: " + std::to_string(responseBody.length()) + "\r\n";
-        response += "Server: TheServer/1.0\r\n";
-        response += "\r\n";
-        return response;
-    }
+        std::ostringstream oss;
+        oss << "HTTP/1.1 " << statusCode << " " << statusMessage << "\r\n"
+            << "Content-Type: " << contentType << "\r\n"
+            << "Content-Length: " << responseBody.size() << "\r\n"
+            << "Connection: keep-alive\r\n"
+            << "\r\n"  
+            << responseBody; 
     
-    std::string toString() {
-        return statusLine + "\r\n" + headers + "\r\n" + body;
+        return oss.str();
     }
 };
 

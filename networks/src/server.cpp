@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 Server::Server() : addr("127.0.0.1"), port(8080) {} 
 
@@ -13,7 +14,9 @@ Server::Server(std::string addr, int port)
 : addr(addr), port(port) {}   
 
 Server::~Server() {
-    close(serverSocket);
+    if (serverSocket != -1) {
+        close(serverSocket);
+    }
 }
 
 
@@ -65,6 +68,25 @@ int Server::acceptClient() {
     }
 
     return this->newSocket;
+}
+
+std::vector<char> Server::receiveData() {
+    std::vector<char> buf(1024);
+    ssize_t bytes = recv(newSocket, buf.data(), buf.size(), 0); 
+    if (bytes < 0) {
+        throw std::runtime_error("Failed to receive message. Err: " + std::to_string(errno));
+    } 
+    if (bytes == 0) {
+        throw std::runtime_error("Client closed");
+    }
+    if (bytes < (ssize_t)buf.size()) {
+        buf.resize(bytes);
+    }
+    return buf;
+}
+
+void Server::parseHTTP(std::vector<char> buf) {
+    std::string str(buf.begin(), buf.end());
 }
 
 void Server::sendHTTPResp() {

@@ -29,7 +29,7 @@ int Server::startServer(bool ipv6) {
     try {
         serverSocket = socket(ipv6 ? AF_INET6 : AF_INET, SOCK_STREAM, 0);
         if (serverSocket == -1)
-            throw SocketFailureException("Socket creation failed. Error code" + (errno));
+            throw SocketFailureException(&"Socket creation failed. Error code" [ (errno)]);
 
         if (ipv6) {
             serverAddress_v6.sin6_family = AF_INET6;

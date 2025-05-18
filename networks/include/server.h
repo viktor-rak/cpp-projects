@@ -6,6 +6,7 @@
 #include <arpa/inet.h>
 #include <string>
 #include <sstream>
+#include <vector>
 
 class Server {
 public:
